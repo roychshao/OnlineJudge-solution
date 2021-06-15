@@ -1,2 +1,2 @@
-# Problem on NCCU OJ
+# Problems on NCCU OJ
     by Ry Shao
