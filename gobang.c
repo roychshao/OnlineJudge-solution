@@ -1,13 +1,14 @@
 ﻿
 /*************************
-*	計分方式如下:			 *
-*	全活1: 16, 一邊被擋-2	 *
-*	死2: 16				 *
-*	2空1: 500,			 *
-*	活2 , 死3: 100		 *
-*	活3 , 死4: 1000	 	 *
-*	活4 : 10000		 	 *
-*	五子一線: 999999		 *
+*   score calculation:	 *
+*	live1: 16,           *
+*	each side dead-2	 *
+*	dead2: 16			 *
+*	2space1: 500,	     *
+*	live2, dead3: 100	 *
+*	live3, dead4: 1000 	 *
+*	live4 : 10000	 	 *
+*	FiveALine: 999999	 *
 **************************/
 
 
@@ -46,7 +47,7 @@ bool gameover = false;
 
 void print()
 {
-	/* 印出棋盤 */
+	/* print the chessboard */
 	for (int i = 14; i >= 0; --i)
 	{
 		if (i + 1 < 10)
@@ -76,7 +77,7 @@ void Initialize()
 	memset(chess, NOCHESS, sizeof(chess));
 	memset(chessscore, NOCHESS, sizeof(chessscore));
 	srand(time(NULL));
-	/* 設定棋盤靠中央的分數較高，四周較低 */
+	/* the more  central place, the higher score */
 	for(int i = 0;i < 15; ++i)
 		for (int j = 0; j < 15; ++j)
 		{
@@ -102,11 +103,12 @@ void Initialize()
 	print();
 }
 
+/* according to the condition of chesses to calculate a player's score */
 int CalScore(int codename)
 {
 	int length = 0, score = 0, i_cp, j_cp;
 	int oppo = -1 * codename;
-	/* 橫向組合 */
+	/* horizontal */
 	memcpy(chesscopy, chess, sizeof(chess));
 	for (int i = 0; i < 15; ++i)
 	{
@@ -118,7 +120,7 @@ int CalScore(int codename)
 				chesscopy[i_cp][j_cp] = 0;
 				length++, j_cp++;
 			}
-			/* 算分 */
+			/* cal score */
 			if ((length == 2 && (j == 0 || chess[i][j - 1] == oppo || j_cp == 15 || chess[i][j_cp] == oppo)))
 			{
 				if ((j_cp < 14 && chess[i_cp][j_cp] == NOCHESS && chess[i_cp][j_cp + 1] == codename) ||
@@ -152,7 +154,7 @@ int CalScore(int codename)
 				score += FIVESCORE;
 		}
 	}
-	/* 縱向組合 */
+	/* vertical */
 	memcpy(chesscopy, chess, sizeof(chess));
 	for (int i = 0; i < 15; ++i)
 	{
@@ -164,6 +166,7 @@ int CalScore(int codename)
 				chesscopy[i_cp][j_cp] = 0;
 				length++, i_cp++;
 			}
+            /* cal score */
 			if (length == 2 && (i == 0 || chess[i - 1][j] == -oppo || i_cp == 15 || chess[i_cp][j] == oppo))
 			{
 				if ((i_cp < 14 && chess[i_cp][j_cp] == NOCHESS && chess[i_cp][j_cp + 1] == codename) ||
@@ -197,7 +200,7 @@ int CalScore(int codename)
 				score += FIVESCORE;
 		}
 	}
-	/* 遞減方向組合 */
+	/* decreasingly diagonal */
 	memcpy(chesscopy, chess, sizeof(chess));
 	for (int i = 0; i < 15; ++i)
 	{
@@ -209,6 +212,7 @@ int CalScore(int codename)
 				chesscopy[i_cp][j_cp] = 0;
 				length++, j_cp--, i_cp++;
 			}
+            /* cal score */
 			if (length == 2 && (j_cp == -1 || i_cp == 15 || j == 14 || i == 0 || chess[i_cp][j_cp] == oppo || chess[i - 1][j + 1] == oppo))
 			{
 				if ((i_cp < 15 && j_cp > 0 && chess[i_cp][j_cp] == NOCHESS && chess[i_cp + 1][j_cp - 1] == codename) ||
@@ -242,7 +246,7 @@ int CalScore(int codename)
 				score += FIVESCORE;
 		}
 	}
-	/* 遞增方向組合 */
+	/* increasingly diagonal */
 	memcpy(chesscopy, chess, sizeof(chess));
 	for (int i = 0; i < 15; ++i)
 	{
@@ -254,6 +258,7 @@ int CalScore(int codename)
 				chesscopy[i_cp][j_cp] = 0;
 				length++, j_cp++, i_cp++;
 			}
+            /* cal score */
 			if (length == 2 && (i == 0 || j == 0 || i_cp == 15 || j_cp == 15 || chess[i - 1][j - 1] == oppo || chess[i_cp][j_cp] == oppo))
 			{
 				if ((i_cp < 15 && j_cp < 15 && chess[i_cp][j_cp] == NOCHESS && chess[i_cp + 1][j_cp + 1] == codename) ||
@@ -287,7 +292,7 @@ int CalScore(int codename)
 				score += 9999999;
 		}
 	}
-	/* 單子分 */
+	/* isolated chess(one chess) */
 	for (int i = 0; i < 15; ++i)
 	{
 		for (int j = 0; j < 15; ++j)
@@ -334,16 +339,19 @@ void ComputerMove(int x, int y)
 	{
 		for (int j = 0; j < 15; ++j)
 		{
-			if (chess[i][j] == NOCHESS)	/* 對每一步可能的走法做算分 */
-			{
+			if (chess[i][j] == NOCHESS)
+            {    
+                /* cal score for every possible way */
 				chess[i][j] = BLACKCHESS;
 				cstemp = CalScore(BLACKCHESS);
 				pstemp = CalScore(WHITECHESS);
 				chess[i][j] = NOCHESS;
-				if (StateScore <= ((cstemp - ComputerScore) + DEFENDCOEFFICIENT * (PlayerScore - pstemp)))	/* 更新最佳走法 */
-				{
-					int RandNum = rand() % 2;	/* 設定亂數讓電腦在兩個同分的位置任選 */
-					if (StateScore == ((cstemp - ComputerScore) + DEFENDCOEFFICIENT * (PlayerScore - pstemp)) && RandNum)
+				if (StateScore <= ((cstemp - ComputerScore) + DEFENDCOEFFICIENT * (PlayerScore - pstemp)))
+                {    
+                    /* update the best way */
+					int RandNum = rand() % 2;	/* choose random place for equal score */
+					if (StateScore == ((cstemp - ComputerScore) + DEFENDCOEFFICIENT * (PlayerScore - pstemp)) 
+                        && RandNum)
 						break;
 					best_i = i, best_j = j;
 					StateScore = (cstemp - ComputerScore) + (PlayerScore - pstemp);
@@ -365,11 +373,11 @@ int main()
 	while (!gameover)
 	{
 		printf("ROUND %d:\n", counter+1);
-		if (counter % 2 == 0)	/* 玩家下棋 */
+		if (counter % 2 == 0)	/* player goes */
 		{
 			printf("(Player) Enter the place you are going to put on:");
 			scanf("%d%d", &x, &y);
-			if (x > 15 || y > 15 || x < 1 || y < 1 || chess[y-1][x-1] != 0)	/* 不能下的位置 */
+			if (x > 15 || y > 15 || x < 1 || y < 1 || chess[y-1][x-1] != 0)	/* wrong step process */
 			{
 				printf("Wrong step !!\n");
 				printf("(Player) Enter the place you are going to put on:");
@@ -379,9 +387,9 @@ int main()
 			print();
 			PlayerScore = CalScore(1);
 		}
-		else	/* 電腦下棋 */
+		else	/* computer goes */
 			ComputerMove(x, y);
-		if (PlayerScore >= GAMEOVERSCORE)	/* 遊戲結束判定 */
+		if (PlayerScore >= GAMEOVERSCORE)	/* game over determination */
 		{
 			printf("The white chess win !! (Player)\n");
 			gameover = true;
