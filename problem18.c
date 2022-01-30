@@ -3,39 +3,31 @@
 
 int main()
 {
-	int times,i=0;
-	int bindex;
-	char bnry[32];
-	scanf("%d",&times);
+	int times, i = 0, idx, num;
+	int bnry[32];
+	scanf("%d", &times);
 	while(i < times)
 	{
-		int num;
-		bindex = 0;	
-		memset(bnry,NULL,sizeof(bnry));		
-		scanf("%d",&num);
+		idx = 0;
+		memset(bnry, 0, sizeof(bnry));
+		scanf("%d", &num);
 		if(num == 0)
 		{
 			printf("0\n");
-			i++;
 			continue;
 		}
 		while(num > 0)
 		{
-			if(num % 2 == 0)
-			{
-				num /= 2;
-				bnry[bindex] = '0';
-				bindex++;
-			}
-			else
+			if(num % 2)
 			{
 				num = (num - 1) / 2;
-				bnry[bindex] = '1';
-				bindex++;
+				bnry[idx++] = 1;
 			}
+			else
+				num /= 2, bnry[idx++] = 0;
 		}
-		for(int j=bindex-1;j>=0;j--)
-			printf("%c",bnry[j]);
+		for(int j = idx-1;j >= 0; --j)
+			printf("%d",bnry[j]);
 		printf("\n");
 		i++;
 	}
